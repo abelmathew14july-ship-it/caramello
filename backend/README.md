@@ -1,38 +1,31 @@
-Caramello — Backend + Prisma integration
+# Caramello backend
 
-Quick start
+The Express backend stores products and orders in PostgreSQL.
 
-1. Change into the backend directory
+## Setup
 
-```bash
-cd backend
-```
+1. Install PostgreSQL and create a database named `caramello`.
+2. From this directory, install the Node.js dependencies:
 
-2. Install dependencies
+   ```sh
+   npm install
+   ```
 
-```bash
-npm install
-```
+3. Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection string.
+4. Start the server:
 
-3. Generate Prisma client and migrate (creates SQLite `dev.db`)
+   ```sh
+   npm start
+   ```
 
-```bash
-npm run prisma:generate
-npm run prisma:migrate
-npm run seed
-```
+The server creates the required tables on startup. To add the sample products, run `npm run seed` after configuring the database. The seed command does not overwrite existing products.
 
-4. Start server
+The backend serves the frontend and exposes API endpoints under `/api/products` and `/api/orders`.
 
-```bash
-npm start
-```
+## Frontend integration
 
-The Express server serves the frontend files and exposes API endpoints under `/api/products`.
+- The admin panel syncs product changes to the server.
+- The public site attempts to fetch products from the server and falls back to local storage.
+- To share live updates across clients, open the site through the running backend at `http://localhost:3000`.
 
-Frontend integration
-
-- Admin panel (`admin.js`) now syncs product changes to the server (best-effort).
-- Public site (`script.js`) will attempt to fetch live products from the server on load and fall back to localStorage.
-
-If you want real-time updates across clients, deploy the server and open both admin and public pages from `http://localhost:3000`.
+Existing SQLite records are not imported automatically. If you need that data, export it from a backup and import it into PostgreSQL.

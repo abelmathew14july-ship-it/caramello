@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS "Product" (
+  "id" SERIAL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "description" TEXT,
+  "price" TEXT NOT NULL,
+  "originalPrice" TEXT,
+  "categories" JSONB NOT NULL DEFAULT '[]'::jsonb,
+  "images" JSONB NOT NULL DEFAULT '[]'::jsonb,
+  "mainImage" TEXT,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Order" (
+  "id" SERIAL PRIMARY KEY,
+  "customerName" TEXT NOT NULL,
+  "phone" TEXT NOT NULL,
+  "category" TEXT,
+  "note" TEXT,
+  "status" TEXT NOT NULL DEFAULT 'new',
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
