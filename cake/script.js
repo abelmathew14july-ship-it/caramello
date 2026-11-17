@@ -826,6 +826,7 @@ window.addEventListener('storage', function (e) {
 // Helper to map folder name to disk directory layout due to whitespaces
 function getPhysicalImagePath(imagePath) {
   if (!imagePath) return '';
+  if (imagePath.startsWith('/uploads/')) return `${API_BASE_URL}${imagePath}`;
   if (imagePath.startsWith('/') || imagePath.startsWith('http')) return imagePath;
   // Avoid double-prefixing if path already starts with 'products/'
   let physical = imagePath.startsWith('products/') ? imagePath : 'products/' + imagePath;

@@ -139,6 +139,10 @@ async function syncSingleProduct(item) {
     if (!res.ok) throw new Error('upsert failed');
     const data = await res.json();
     const realId = data && data.id ? data.id : id;
+    if (realId && realId !== id) {
+      item.id = realId;
+      saveProducts();
+    }
     if (realId) setSyncStatus(realId, 'ok');
     return data;
   } catch (e) {
@@ -219,7 +223,7 @@ function updateGlobalSyncStatus(text, state) {
 }
 
 function nextId() {
-  return products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  return products.length ? Math.max(...products.map(p => Number(p.id) || 0)) + 1 : 1;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -323,7 +327,7 @@ const SECTIONS = ['dashboard', 'products', 'orders', 'add'];
 const NAV_IDS = { dashboard: 'navDashboard', products: 'navProducts', orders: 'navOrders', add: 'navAdd' };
 const BC_TEXT = { dashboard: 'Dashboard', products: 'All Products', orders: 'Customer Orders', add: 'Add / Edit Product' };
 
-function showSection(name) {
+function showSection(name, isEdit = false) {
   SECTIONS.forEach(s => {
     document.getElementById(`section${cap(s)}`).classList.toggle('active-section', s === name);
     document.getElementById(NAV_IDS[s]).classList.toggle('active', s === name);
@@ -333,12 +337,17 @@ function showSection(name) {
   if (name === 'dashboard') updateDashboard();
   if (name === 'products') renderProducts();
   if (name === 'orders') renderOrders();
-  if (name === 'add' && editingId === null) resetForm();
+  if (name === 'add' && !isEdit) resetForm();
 
   // Close sidebar on mobile
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
   }
+}
+
+function startAddProduct() {
+  resetForm();
+  showSection('add', false);
 }
 
 async function loadOrders() {
@@ -501,7 +510,7 @@ function renderProducts(list = null) {
 
     const hasImg = p.mainImage && p.mainImage.trim();
     const imgHtml = hasImg
-      ? `<img class="pc-img" src="${esc(p.mainImage)}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="pc-img-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No image</span></div>`
+      ? `<img class="pc-img" src="${esc(imagePreviewUrl(p.mainImage))}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="pc-img-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No image</span></div>`
       : `<div class="pc-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No image</span></div>`;
 
     const origHtml = p.originalPrice ? `<span class="pc-orig">${esc(p.originalPrice)}</span>` : '';
@@ -603,8 +612,9 @@ function editProduct(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
 
+  resetForm();
   editingId = id;
-  showSection('add');
+  showSection('add', true);
 
   document.getElementById('editId').value = id;
   document.getElementById('pName').value = p.name;
@@ -720,7 +730,7 @@ async function saveProduct(e) {
   }
 
   document.getElementById('productCount').textContent = products.length;
-  editingId = null;
+  resetForm();
   showSection('products');
 }
 
@@ -734,6 +744,7 @@ function cancelEdit() {
 ═══════════════════════════════════════════════════════════ */
 function imagePreviewUrl(image) {
   if (!image) return '';
+  if (image.startsWith('/uploads/')) return `${API_BASE_URL}${image}`;
   if (image.startsWith('/') || image.startsWith('http')) return image;
   return `products/${image}`;
 }
