@@ -4,7 +4,7 @@
 ═══════════════════════════════════════════════════════════ */
 
 'use strict';
-const API_BASE_URL = 'https://caremello-7.onrender.com';
+const API_BASE_URL = 'https://caramello.onrender.com';
 
 /* ── Admin Credentials (change here to update) ── */
 const ADMIN_CREDS = { username: 'admin', password: 'caramello2024' };
